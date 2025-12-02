@@ -633,28 +633,6 @@
                 svg.appendChild(text);
             });
 
-            // Draw side labels
-            const sideLabels = [
-                { p1: A, p2: B, text: a.toFixed(1), offset: -20 },
-                { p1: B, p2: C, text: c.toFixed(1), offset: 15 },
-                { p1: C, p2: A, text: b.toFixed(1), offset: -20 }
-            ];
-            
-            sideLabels.forEach(side => {
-                const midX = (side.p1.x + side.p2.x) / 2;
-                const midY = (side.p1.y + side.p2.y) / 2;
-                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-                text.setAttribute('x', midX);
-                text.setAttribute('y', midY + side.offset);
-                text.setAttribute('font-size', 14);
-                text.setAttribute('fill', '#7e22ce');
-                text.setAttribute('text-anchor', 'middle');
-                text.setAttribute('font-weight', 'bold');
-                text.setAttribute('background', 'white');
-                text.textContent = side.text;
-                svg.appendChild(text);
-            });
-
             // Draw grid squares
             const cellSizeA = getGridSquareSize(a, scale);
             const cellSizeB = getGridSquareSize(b, scale);
@@ -667,6 +645,53 @@
             drawGridSquares(svg, A, B, countA, cellSizeA, centroid);
             drawGridSquares(svg, B, C, countC, cellSizeC, centroid);
             drawGridSquares(svg, C, A, countB, cellSizeB, centroid);
+
+            // Draw side labels next to the grid squares
+            const sideLabelsData = [
+                { p1: A, p2: B, label: 'a', value: a.toFixed(1), cellSize: cellSizeA },
+                { p1: B, p2: C, label: 'c', value: c.toFixed(1), cellSize: cellSizeC },
+                { p1: C, p2: A, label: 'b', value: b.toFixed(1), cellSize: cellSizeB }
+            ];
+            
+            sideLabelsData.forEach(side => {
+                const midX = (side.p1.x + side.p2.x) / 2;
+                const midY = (side.p1.y + side.p2.y) / 2;
+                
+                // Get normal direction (pointing outward)
+                const normal = getOuterNormal(side.p1, side.p2, centroid);
+                
+                // Position label further out, beyond the grid squares
+                const labelDistance = side.cellSize * 2.5;
+                const labelX = midX + normal.x * labelDistance;
+                const labelY = midY + normal.y * labelDistance;
+                
+                // Background box for better readability
+                const boxWidth = 55;
+                const boxHeight = 24;
+                const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                rect.setAttribute('x', labelX - boxWidth/2);
+                rect.setAttribute('y', labelY - boxHeight/2 - 3);
+                rect.setAttribute('width', boxWidth);
+                rect.setAttribute('height', boxHeight);
+                rect.setAttribute('fill', 'white');
+                rect.setAttribute('stroke', '#7e22ce');
+                rect.setAttribute('stroke-width', 2);
+                rect.setAttribute('rx', 6);
+                rect.setAttribute('opacity', 0.98);
+                rect.setAttribute('filter', 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))');
+                svg.appendChild(rect);
+                
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text.setAttribute('x', labelX);
+                text.setAttribute('y', labelY + 1);
+                text.setAttribute('font-size', 14);
+                text.setAttribute('fill', '#7e22ce');
+                text.setAttribute('text-anchor', 'middle');
+                text.setAttribute('dominant-baseline', 'middle');
+                text.setAttribute('font-weight', 'bold');
+                text.textContent = `${side.label} = ${side.value}`;
+                svg.appendChild(text);
+            });
 
             // Display info
             const perimeter = a + b + c;
