@@ -427,8 +427,26 @@
                 return false;
             }
 
-            if (a + b <= c || a + c <= b || b + c <= a) {
-                errors.triangle = '❌ Sisi tidak membentuk segitiga — periksa kembali.';
+            // Check if c is smaller than both a and b - triangle cannot be formed
+            if (c < a && c < b) {
+                errors.triangle = '❌ Segitiga tidak terbentuk: sisi c tidak boleh lebih kecil dari sisi a dan b';
+                showErrors(errors);
+                return false;
+            }
+
+            // Check triangle inequality theorem: sum of any two sides must be greater than the third side
+            if (a + b <= c) {
+                errors.triangle = '❌ Sisi tidak membentuk segitiga: a + b harus lebih besar dari c';
+                showErrors(errors);
+                return false;
+            }
+            if (a + c <= b) {
+                errors.triangle = '❌ Sisi tidak membentuk segitiga: a + c harus lebih besar dari b';
+                showErrors(errors);
+                return false;
+            }
+            if (b + c <= a) {
+                errors.triangle = '❌ Sisi tidak membentuk segitiga: b + c harus lebih besar dari a';
                 showErrors(errors);
                 return false;
             }
